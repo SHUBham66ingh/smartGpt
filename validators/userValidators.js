@@ -1,7 +1,5 @@
 import {z} from zod;
 
-
-
 export const signupSchema =  z.object({
     name : z.string()
             .trim()
@@ -19,3 +17,4 @@ export const signupSchema =  z.object({
      .regez(/[A-Z]/,"Your password should have atleast 1 capital letter")
      .regex(/[a-z]/,"Your password should have atleast 1 small letter")
 })
+
