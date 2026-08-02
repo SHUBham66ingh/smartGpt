@@ -1,4 +1,5 @@
 import Chat from "../model/chatSchema.js";
+import Message from "../model/messageSchema";
 
 export const getRecentChat = async(req , res)=>{
 
