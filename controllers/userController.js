@@ -124,7 +124,7 @@ export const login = async(req , res)=>{
     {
         console.log(err);
         res.status(500).json({
-            message : "Interval server error";
+            message : "Interval server error"
         })
     }
 
