@@ -12,8 +12,6 @@ export const getRecentChat = async(req , res)=>{
     chats
   })
 
-
-
     }
     catch(err){
       console.log(err);
@@ -47,7 +45,7 @@ export const getSingleChat = async(req , res)=>{
      {
         console.log(err);
         res.status(500).json({
-            message : "interval server error";
+            message : "interval server error"
         })
      }
 }
