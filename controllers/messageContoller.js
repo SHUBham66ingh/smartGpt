@@ -35,39 +35,81 @@ export const getMessage = async (req, res) => {
 export const sendMessage = async (req, res) => {
   try {
     const { chatId } = req.params;
-    const { content } = req.body;
+    const { content , model } = req.body;
 
     if (!content || content.trim == "") {
       return res.status(400).json({
         message: "You didn't send any message",
       });
     }
+     let chat;
 
-    const chat = await Chat.findOne({
-      _id: chatId,
-      userId: req.user._id,
-    });
+    // existing chat case
+    if(chatId)
+    {
+       if(!mongoose.Types.ObjectId.isValid(chatId))
+       {
+         return res.status(404).json({
+          message : "Invalid chat Id"
+         })
+       }
+       chat = await Chat.findOne({
+        _id : chatId,
+        userId : req.user_.id
+       })
 
-    const Usermessage = await Message.create({
-      userId: req.user_.id,
-      chatId: chatId,
-      role: "user",
-      content: content,
-    });
+       if(!chat)
+       {
+         return res.status(404).json({
+          message : "Chat not founded"
+         })
+       }
+    }
 
-    // content ko ai ko  bhejna hain.
+     else{
+      if(!model)
+      {
+         return res.status(400).json({
+          message : "Model is required for new chat"
+         })
+      }
 
-    const dummyReply = "Mein changs hi";
+      chat  = await Chat.create({
+        userId : req.user._id,
+        model,
+        topic : content.trim().slice(0 , 40)
+      })
+     }
 
-    const assMessage = await Message.create({
-      userId: req.user._id,
-      chatId: chatId,
-      role: "assistant",
-      content: dummyReply,
-    });
 
+     const userMessage = await Message.create({
+      chatId : chat._id,
+      role : "user" ,
+      content : content.trim()
+     })
+
+
+     const aiReply = "Ai reply willl come here later";
+
+     const assitanntMessage = await Message.create({
+      chatId : chat._id,
+      role : "assistant",
+      content : aiReply
+     })
+
+     chat.messageCount +=2;
+
+     if(chat.topic==="New Chat")
+     {
+      chat.topic = content.trim().slice(0 , 40);
+     }
+
+     await chat.save();
     res.status(201).json({
-      message: dummyReply,
+      message: "Message sent successfully",
+      chatId: chat._id,
+      userMessage,
+      assistantMessage
     });
   } catch (err) {
     console.log(err);
