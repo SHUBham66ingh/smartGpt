@@ -1,8 +1,8 @@
 
 import User from "../model/userSchema.js";
 import jwt from "jsonwebtoken";
-import bcrypt from bcrypt;
-import  signupSchema from "../validators/userValidators.js";
+import bcrypt from "bcrypt";
+import  {signupSchema} from "../validators/userValidators.js";
 
 
 const createToken = (id , email)=>{
@@ -145,7 +145,7 @@ export const logout = async(req , res)=>{
 
 
 
-export const profie = async(req,res)=>{
+export const profile = async(req,res)=>{
     try{
         // profile ki informat send karo
         // Database ke andar call kari padegi, us user ko search, _id, email
