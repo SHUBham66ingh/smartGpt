@@ -13,7 +13,7 @@ const  messageSchema = new mongoose.Schema({
        chatId :{
         type : mongoose.Schema.Types.ObjectId,
         ref : "Chat",
-        reuired : true
+        required : true
        },
 
        role:{
@@ -33,7 +33,7 @@ const  messageSchema = new mongoose.Schema({
        },
 
        usage :{
-        promtTokens : {
+        promptTokens : {
         type : Number ,
         default : 0
         },

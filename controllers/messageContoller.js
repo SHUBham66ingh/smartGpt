@@ -1,5 +1,6 @@
 import Chat from "../model/chatSchema.js";
 import Message from "../model/messageSchema.js";
+import mongoose from "mongoose";
 
 export const getMessage = async (req, res) => {
   try {
@@ -11,7 +12,7 @@ export const getMessage = async (req, res) => {
     });
 
     if (!chat) {
-      return res.status(200).json({
+      return res.status(404).json({
         message: "Chat not founded",
       });
     }
@@ -22,7 +23,7 @@ export const getMessage = async (req, res) => {
 
     res.status(200).json({
       message: "Message send successfully",
-      msg: messages,
+      msg: message
     });
   } catch (err) {
     console.log(err);
@@ -35,86 +36,99 @@ export const getMessage = async (req, res) => {
 export const sendMessage = async (req, res) => {
   try {
     const { chatId } = req.params;
-    const { content , model } = req.body;
+    const { content, model } = req.body;
 
-    if (!content || content.trim == "") {
+    // Validate message
+    if (!content || content.trim() === "") {
       return res.status(400).json({
         message: "You didn't send any message",
       });
     }
-     let chat;
 
-    // existing chat case
-    if(chatId)
-    {
-       if(!mongoose.Types.ObjectId.isValid(chatId))
-       {
-         return res.status(404).json({
-          message : "Invalid chat Id"
-         })
-       }
-       chat = await Chat.findOne({
-        _id : chatId,
-        userId : req.user_.id
-       })
+    let chat;
 
-       if(!chat)
-       {
-         return res.status(404).json({
-          message : "Chat not founded"
-         })
-       }
-    }
-
-     else{
-      if(!model)
-      {
-         return res.status(400).json({
-          message : "Model is required for new chat"
-         })
+    // Existing chat
+    if (chatId) {
+      if (!mongoose.Types.ObjectId.isValid(chatId)) {
+        return res.status(400).json({
+          message: "Invalid chat Id",
+        });
       }
 
-      chat  = await Chat.create({
-        userId : req.user._id,
+      chat = await Chat.findOne({
+        _id: chatId,
+        userId: req.user._id,
+      });
+
+      if (!chat) {
+        return res.status(404).json({
+          message: "Chat not found",
+        });
+      }
+    }
+
+    // New chat
+    else {
+      if (!model) {
+        return res.status(400).json({
+          message: "Model is required for new chat",
+        });
+      }
+
+      chat = await Chat.create({
+        userId: req.user._id,
         model,
-        topic : content.trim().slice(0 , 40)
-      })
-     }
+        topic: content.trim().slice(0, 40),
+      });
+    }
 
+    // Create user message
+    const userMessage = await Message.create({
+      chatId: chat._id,
+      role: "user",
+      content: content.trim(),
+      userId: req.user._id,
+      model: chat.model,
+    });
 
-     const userMessage = await Message.create({
-      chatId : chat._id,
-      role : "user" ,
-      content : content.trim()
-     })
+    // Temporary AI response
+    const aiReply = "AI reply will come here later";
 
+    // Create assistant message
+    const assistantMessage = await Message.create({
+      chatId: chat._id,
+      role: "assistant",
+      content: aiReply,
+      userId: req.user._id,
+      model: chat.model,
+    });
 
-     const aiReply = "Ai reply willl come here later";
+    // Update message count
+    chat.messageCount += 2;
 
-     const assitanntMessage = await Message.create({
-      chatId : chat._id,
-      role : "assistant",
-      content : aiReply
-     })
+    // Update topic if needed
+    if (chat.topic === "New Chat") {
+      chat.topic = content.trim().slice(0, 40);
+    }
 
-     chat.messageCount +=2;
+    await chat.save();
 
-     if(chat.topic==="New Chat")
-     {
-      chat.topic = content.trim().slice(0 , 40);
-     }
-
-     await chat.save();
     res.status(201).json({
       message: "Message sent successfully",
       chatId: chat._id,
       userMessage,
-      assistantMessage
+      assistantMessage,
     });
+
   } catch (err) {
     console.log(err);
+
     res.status(500).json({
       message: "Internal server error",
     });
   }
 };
+
+
+
+
