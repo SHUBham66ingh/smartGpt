@@ -8,11 +8,11 @@ import Message from "../model/messageSchema.js"
 
 
 const createToken = (id , email)=>{
-    if(!process.env.JWT_SECRET)
+    if(!process.env.JWT_SECRET_KEY)
     {
         throw new Error("secret key is missing");
     }
-    const token = jwt.sign({id , email} , process.env.JWT_SECRET , {expiresIn:"1h"});
+    const token = jwt.sign({id , email} , process.env.JWT_SECRET_KEY , {expiresIn:"1h"});
     return token;
 }
 
@@ -83,9 +83,6 @@ export const signup = async ( req , res , next)=>{
 
 
 
-
-
-
 export const login = async(req , res)=>{
     
     try{
@@ -148,6 +145,8 @@ export const login = async(req , res)=>{
     }
 
 }
+
+
 
 
 export const logout = async(req , res)=>{

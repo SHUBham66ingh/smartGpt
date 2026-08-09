@@ -13,7 +13,7 @@ const authUserMiddleware =  async(req , res , next)=>{
             })
         }
 
-         const payload = jwt.verify(token , process.env.JWT.SECRET_KEY);
+         const payload = jwt.verify(token , process.env.JWT_SECRET_KEY);
 
          const existingUser = await User.findById(payload.id);
 

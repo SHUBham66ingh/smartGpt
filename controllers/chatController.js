@@ -4,12 +4,11 @@ import Message from "../model/messageSchema.js";
 export const getRecentChat = async(req , res)=>{
 
     try{
-
-  const chats = await Chat.find({userId:req.user._id}).select("topic updatedAt").toSorted({updatedAt:-1}).limit(20);
+  const chats = await Chat.find({userId:req.user._id}).select("topic updatedAt").sort({updatedAt:-1}).limit(20);
 
   res.status(200).json({
     message : "chat fetched successfully",
-    chats
+    chats,
   })
 
     }
@@ -20,6 +19,12 @@ export const getRecentChat = async(req , res)=>{
       })
     }
 }
+
+
+
+
+
+
 
 export const getSingleChat = async(req , res)=>{
      try{
@@ -52,7 +57,7 @@ export const getSingleChat = async(req , res)=>{
 
 
 
-export const createChat = async(req , res)=>{
+export const createChat = async(req , res ,  next )=>{
      try{
         const {model} = req.body;
         if(!model)
@@ -62,12 +67,11 @@ export const createChat = async(req , res)=>{
             })
         }
         const chats = await Chat.create({
-            chatId: chats._id,
             userId: req.user._id,
             model,
         })
 
-         res.status(201).json({
+          res.status(201).json({
             chatId: chats._id,
             userId: req.user._id,
             model,
@@ -78,7 +82,7 @@ export const createChat = async(req , res)=>{
      catch(err)
      {
         console.log(err)
-        res(500).json({
+         res(500).json({
             message: "Interval server error"
         })
      }
@@ -90,7 +94,7 @@ export const deleteChat = async(req , res)=>{
 
         const{chatId} = req.params;
 
-        const chat =  await chat.findOne({_id:chatId , userId:req.user._id});
+        const chat =  await Chat.findOne({_id:chatId , userId:req.user._id});
    
          
         if(!chat)
