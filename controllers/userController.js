@@ -187,4 +187,34 @@ export const profile = async(req,res)=>{
 
 
 
+export const deleteProfile = async( req , res)=>{
+      try{
+             const userId = req.user._id;
+
+          await Message.deleteMany({
+            userId
+                  });
+
+    
+                  await Chat.deleteMany({
+                userId
+               });
+
+    
+             await User.findByIdAndDelete(userId);
+
+    res.status(200).json({
+      message: "Profile and all related data deleted successfully"
+    });
+       }
+      catch(err)
+      {
+        console.log(err);
+        res.status(500).json({
+            message : "Internal server error"
+        })
+      }
+}
+
+
 
