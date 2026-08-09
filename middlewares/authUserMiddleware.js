@@ -1,14 +1,21 @@
 import jwt from "jsonwebtoken";
 import User from "../model/userSchema.js";
+import dotenv from "dotenv";
 
 
 const authUserMiddleware =  async(req , res , next)=>{
      try{
          const {token} = req.cookies;
 
+           if(!token){
+            return res.status(401).json({
+                message: "You need to login First"
+            })
+        }
+
          const payload = jwt.verify(token , process.env.JWT.SECRET_KEY);
 
-         const existingUser = await findOne({payload_id});
+         const existingUser = await User.findById(payload.id);
 
          if(!existingUser){
             res.status(404).json({
@@ -22,7 +29,7 @@ const authUserMiddleware =  async(req , res , next)=>{
      catch(err)
      {
         console.log(err);
-        res.staus(500).json({
+        res.status(500).json({
             message : "Inteval server error"
         })
      }

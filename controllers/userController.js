@@ -2,7 +2,9 @@
 import User from "../model/userSchema.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import  {signupSchema} from "../validators/userValidators.js";
+import {signupSchema, loginSchema} from "../validators/userValidators.js"
+import Chat from "../model/chatSchema.js"
+import Message from "../model/messageSchema.js"
 
 
 const createToken = (id , email)=>{
@@ -24,13 +26,13 @@ const cookiesOption = {
 
 
 
-export const signup = async ( req , res)=>{
+export const signup = async ( req , res , next)=>{
       try{
 
         //validate this data
       const result =  signupSchema.safeParse(req.body);
          
-     const{name , age , email , passowrd} = req.body;
+     const{name , age , email , password} = req.body;
 
      if(!name || !age || !email || !password)
      {
@@ -80,9 +82,26 @@ export const signup = async ( req , res)=>{
 
 
 
+
+
+
+
 export const login = async(req , res)=>{
-    const {email , password} = req.body;
+    
     try{
+
+        const result = loginSchema.safeParse(req.body);
+       
+        if(!result.success){
+            return res.status(400).json({
+                message: "there are some error in inputs"
+            })
+        }
+       
+
+        const {email, password} = result.data;
+
+        
         if(!email|| !password)
         {
             res.status(400).json({
@@ -90,20 +109,20 @@ export const login = async(req , res)=>{
             })
         }
 
-        const existingUser = User.findOne({email});
+        const existingUser = await  User.findOne({email});
 
         if(!existingUser)
         {
-            res.status(401).json({
+            return  res.status(401).json({
                 message:"Some field are not missing"
             })
-        }
+        } 
 
         const isMatch = await  bcrypt.compare(password , existingUser.password);
 
-         if(!isMacth)
+         if(!isMatch)
          {
-           res.staus(400).json({
+           res.status(401).json({
               message : "Password is wrong"
            })
          }
@@ -112,7 +131,7 @@ export const login = async(req , res)=>{
 
          res.cookie("token" , token , cookiesOption );
 
-         res.status(200).json({
+        return  res.status(200).json({
             message:"User Logged in SuccessFully",
             name: existingUser.name,
             age: existingUser.age,
@@ -138,9 +157,10 @@ export const logout = async(req , res)=>{
         secure:false,
      })
 
-     res.status(200).json({
+       res.status(200).json({
         message:"User logout successfully"
      })
+
 }
 
 
@@ -149,7 +169,7 @@ export const profile = async(req,res)=>{
     try{
         // profile ki informat send karo
         // Database ke andar call kari padegi, us user ko search, _id, email
-        res.status(200).json({
+        return res.status(200).json({
             name:req.user.name,
             age: req.user.age,
             usage: req.user.usage,
@@ -160,7 +180,7 @@ export const profile = async(req,res)=>{
     catch(err){
 
         console.log(err);
-        res.status(500).json({
+      return   res.status(500).json({
             message: "Internal Server error"
         })
     }

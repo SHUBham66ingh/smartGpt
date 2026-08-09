@@ -5,10 +5,11 @@ import authUserMiddleware from "../middlewares/authUserMiddleware.js";
 const userRouter = express.Router();
 
 
-userRouter.post("/login" , login);
-userRouter.post("logout" , logout);
+
+userRouter.post("/login" ,  login);
+userRouter.post("/logout" , logout);
 userRouter.post("/signup" , signup);
-userRouter.get("/profile" ,authUserMiddleware, profile);
+userRouter.get("/profile" , authUserMiddleware ,  profile);
 
 export default userRouter;
 
